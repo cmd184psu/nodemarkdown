@@ -1,0 +1,7 @@
+# copy the contents below to ~/.gitignore and then run: git config --global core.excludesFile ~/.gitignore
+._*
+.gitignore
+.DS_Store
+*.log
+diffs.txt
+

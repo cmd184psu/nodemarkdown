@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>NodeJS Todolist</title>
+	<link rel="stylesheet" href="css/jquery-ui.css" />
+	<!--<link rel="stylesheet" href="css/styles.css" />-->
+	<link rel="stylesheet" href="css/nav.css" />
+	<link rel="stylesheet" href="css/modal.css" />
+	<link rel="stylesheet" href="css/fontawsme.css" />
+	<link rel='stylesheet' href='css/fontawall.css' />
+	<link rel="shortcut icon" href="images/fvw.png" type="image/x-icon" />
+	<script src="js/jquery-1.12.4.js"></script>
+	<script src="js/jquery-ui.js"></script>
+	<!-- script src="js/constants.js"></script> -->
+	<script src="js/utils.js"></script>
+	<script src="js/todo.js"></script>
+	<script>
+		$(document).ready(function(){
+			startTodo()
+			
+			console.log("document ready");
+		});
+	</script>
+</head>
+
+<body>
+	<strong>Vote!</strong>
+	<div id="titleDiv" style="display:none">Title: not implemented</div>
+	<div id="loadedSubject">Subject: <select id="subject-list-selector" onchange="changeSubject()"></select></div>
+	<div id="loadedList">List: <select id="item-list-selector" onchange="changeItem()"></select></div>
+	<div><button id="backBTN" onclick="revertList()">Go Back</button></div>
+	<!-- Total Vote Count: <input type=text id="voteCount" value="100" /><BR>-->
+	<table id="thetable" border=1>
+	</table>
+	<button onclick="vote()">Vote</button>
+	<button onclick="render()">Refresh Page</button>
+	<button id="saveButton" onclick="saveit()">Save</button>
+	<BR />
+	<HR>
+	<BR />
+	<table border=1>
+		<tr>
+			<td>Item: </td><td><input id="itemName" type="text" size="30" /></td>
+		</tr>
+		<tr>
+			<td>JSON: (optional) </td><td><input id="itemJSON" type="text" size="30" /></td>
+			
+		</tr>
+		<tr>
+			<td>Period in Days (optional)</td><td><input id="itemPeriod" type="text" size="30" /></td>
+		</tr>
+		<tr>
+			<td></td><td><button onclick="addIt()">Add Item to List</button></td>
+			
+			
+		</tr>
+	</table>
+</body>
+</html>

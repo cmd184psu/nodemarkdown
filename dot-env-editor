@@ -1,0 +1,14 @@
+PORT=5050
+INDEX=/editor.html
+PREFIX=docs
+EXT=md
+TODO=true
+#DEFAULTSUBJECT=home
+#DEFAULTSUBJECT=work
+#not implemented yet
+#RESTRICTSUBJECT=work
+#DEFAULTITEM=home/index.json #test without subject
+# saving is not enabled yet
+AUTOSAVE=false
+# prevent web server from serving individual items
+STRICT=true
