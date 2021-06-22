@@ -23,9 +23,17 @@ const DEBUG_UTILS=false
 //     });
 // }
 function ajaxGet(uri) {
-	return new Promise((resolve, reject) => {
-        $.get(uri,"", function(result) { resolve(result); });
-    });
+    return new Promise((resolve, reject) => {
+        fetch(uri).then(async (response)=> {
+            resolve(await response.text())
+        })
+    })
+
+
+
+	// return new Promise((resolve, reject) => {
+    //     $.get(uri,"", function(result) { resolve(result); });
+    // });
 }
 
 function ajaxGetJSON(uri) {
@@ -355,47 +363,6 @@ function vote() {
     render();
 }
 
-//render currently loaded content
-//also demonstrates how to use QUIET_LOCAL vs DEBUG_UTILS correctly
-function render() {
-    var QUIET_LOCAL=!DEBUG_UTILS && true
-
-    //console.log("---> render()::QUIET_LOCAL="+QUIET_LOCAL)
-    //console.log("---> render()::DEBUG_UTILS="+DEBUG_UTILS)
-
-    var content="<tr><th>Complete</th><th>Control</td><th>Priority</th><th>The Item</th><th>votes</th><th>Period (in days)</th><th>Next Due Date</th><th>Cooldown</th></tr>";
-    QUIET_LOCAL || console.log("length of array="+arrayOfContent.length);
-    //console.log(JSON.stringify(arrayOfContent,null,3));
-    for(var i=0; i<arrayOfContent.length; i++) {
-        content+=renderRow(i);
-		// for recurring expiration
-    	if(arrayOfContent[i].periodic!=undefined && arrayOfContent[i].periodic) {
-			QUIET_LOCAL || console.log("==>"+i+"th can expire");    
-
-			//new variables:
-			//periodic - boolean; if true, this item is a recurring item
-			//nextDue  - milliseconds since the EPOC / UTC, usually in the future; this is the next due date for this recurring item
-			//period   - duration between due dates in days		
-
-            if(isDueNow(arrayOfContent[i].nextDue)) {
-                QUIET_LOCAL || console.log("\tdue now and again in "+arrayOfContent[i].period+" days");
-            } else {
-                QUIET_LOCAL || console.log("\tdue in the future: "+EpocMStoISODate(arrayOfContent[i].nextDue));
-			} 
-		} else {
-			QUIET_LOCAL || console.log("==>"+i+"th does not expire");
-		}
-    }
-
-    content+="<tr><td name=\"delcol\">&nbsp;</td><td>&nbsp;</td><td>&nbsp;</td><td>Totals</td><td>"+TotalVotes(arrayOfContent)+"</td><td colspan=3>=====</td></tr>";
-    document.getElementById("thetable").innerHTML=content;
-    // for cooldown
-    var now=new Date();
-    var future=new Date(60000+now.getTime());
-    QUIET_LOCAL || console.log("==== "+(future.getUTCMilliseconds()-now.getUTCMilliseconds()));
-    QUIET_LOCAL || console.log("now: "+formatedDate(now));
-    QUIET_LOCAL || console.log("future: "+formatedDate(future));
-}
 
 function rebuildListSelector(s,l,desired) {
     const DEBUG_LOCAL=DEBUG_UTILS || false

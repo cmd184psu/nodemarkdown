@@ -94,7 +94,15 @@ app.get('/config', function(req, res) {
 	
 	content.autosave=(config.autosave || (process.env.AUTOSAVE && process.env.AUTOSAVE.toString().toLowerCase().trim().startsWith("true")))
 
-	if(process.env.TODO!="" && process.env.TODO!=undefined) {
+    if(config.minHeight!=undefined) {
+	  content.minHeight=config.minHeight;
+	} else if(process.env.MINHEIGHT!=undefined) {
+	  content.minHeight=process.env.MINHEIGHT;(config.minHeight  )
+    } else {
+	  content.minHeight="200px"
+    }
+
+    if(process.env.TODO!="" && process.env.TODO!=undefined) {
 		content.todo=(process.env.TODO=="true")
 	}
 	prettyPrint(req,res,content)
@@ -280,10 +288,16 @@ app.get('/items/:subject/:item',function(req,res) {
 	}
 	//console.log("requested item: "+process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item)
 
-
-	sendFileContent(res, process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item, 'application/json');
+ 	var contentType='application/json';
+ 	if(process.env.EXT==".json") contentType='application/json';
+ 	else if(process.env.EXT==".png") contentType='image/png';
+ 	else if(process.env.EXT==".md") contentType='text/plain';
+ 
+ 
+ 	sendFileContent(res, process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item, contentType);
 	//res.end();
 });
+
 
 
 app.post('/items/:subject/:item',function(req,res) {
@@ -299,7 +313,16 @@ app.post('/items/:subject/:item',function(req,res) {
 	}
 	console.log("content-type: "+headers['content-type'])
 	var filename=process.cwd()+"/"+process.env.PREFIX+"/"+req.params.subject+"/"+req.params.item
+	if(req.params.item.endsWith==".json") {
+	  JSONWriter(filename,req,res);
+	} else {
+	  DocWriter(filename,req,res);
+	}
+	res.end();
+});
 
+function JSONWriter(filename, req,res) {
+	console.log("using json writer...")
 	try {
 		if (!fs.existsSync(filename)) {
 			console.log("requested item: "+filename+" does not exist")
@@ -341,8 +364,58 @@ app.post('/items/:subject/:item',function(req,res) {
 			
 		}
 	}
-	res.end();
-});
+}
+
+function DocWriter(filename, req,res) {
+	console.log("using doc writer...")
+	try {
+		if (!fs.existsSync(filename)) {
+			console.log("requested item: "+filename+" does not exist")
+			res.status(404).send({ error: 'invalid request' })
+			res.end();
+			return		  //file exists
+		}
+
+		//file exists, ok to continue
+	} catch(err) {
+		console.error(err)
+		res.status(500).send({ error: 'error checking file existence' })
+		res.end();
+		return
+	}
+
+
+
+	var body=undefined
+	try {
+		body=JSON.parse(JSON.stringify(req.body))
+	} catch(err) {
+		console.error(err)
+		res.status(405).send({ error: 'parse error: content is not json' })
+		res.end();
+		return	
+	}
+	
+	console.log("About to write: "+filename)
+	console.log("==== begin content ====")
+	console.log(body.content)
+	console.log("====  end content  ====")
+	try{ 
+		fs.writeFileSync(filename, body.content);
+		res.send({ msg: 'File '+filename+' written successfully.'})
+	} catch(err) {
+		if( err ) {
+			console.error( err );
+			res.status(400).send({ error: 'unable to write to file '+filename })
+			
+		}
+	}
+
+
+}
+
+
+
 
 function ENVvaristrue(m) {
 	return m && (m.toString().trim().toLowerCase().startsWith('true'))

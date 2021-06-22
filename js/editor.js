@@ -1,5 +1,5 @@
 var config=new Object;
-var arrayOfContent=[];
+var textEditorContent=new Object
 var lists=[]
 
 const item_list_selector='item-list-selector'
@@ -11,15 +11,15 @@ const DEBUG=true
 
 const skipsave=false
 const restrictedsave=false
-const showsavealert=false
+const showsavealert=true
 //const BASE='lists/'
 
-function SaveList(content,filename) {
+function SaveDocument(content,filename) {
     if(filename==undefined) {
         throw error
         //return
     }
-    DEBUG && console.log("SaveList(...content...,"+filename+");");
+    DEBUG && console.log("SaveDocument("+content+","+filename+");");
     $('#saveButton').prop('disabled', true);
 
     if(restrictedsave) {
@@ -35,11 +35,10 @@ function SaveList(content,filename) {
         $('#saveButton').prop('disabled', false);
         return
     }
-    
-    dropVars(); //potential bug; this function works on arrayOfContent global rather than content local
-    DEBUG && console.log(JSON.stringify(content,null,3));
-    
     DEBUG && console.log("OVERWRITING your data in "+filename);
+
+   var body=new Object;
+   body.content=content;
 
     $.ajax({
         url: 'items/'+filename,  //relative target route
@@ -51,7 +50,9 @@ function SaveList(content,filename) {
            console.log("success in saving content for filename: "+this.url)
            if(showsavealert) alert(data.msg)
        },
-       data: JSON.stringify(content), // content to send; has to be stringified, even though it's application/json
+       data: JSON.stringify(body), // content to send; has to be stringified, even though it's application/json
+       //data: content, // content to send; has to be stringified, even though it's application/json
+       //data: , // content to send; has to be stringified, even though it's application/json
        error: function(err){   //something bad happened and ajax is unhappy
             console.log(JSON.stringify(err,null,3));
             if(showsavealert) alert(err.responseJSON.error);
@@ -66,7 +67,10 @@ function SaveList(content,filename) {
 }
 
 function saveit() {
-    if(currentFilename!=undefined) SaveList(arrayOfContent,currentFilename);
+    if(currentFilename==undefined) return;
+    console.log("save content to file: "+currentFilename)
+    console.log("content to save: "+easyMDE.value())
+    SaveDocument(easyMDE.value(), currentFilename )
 }
 
 
@@ -122,12 +126,13 @@ async function SelectNewFile(nf) {
        console.log("current subject index = "+$('#'+subject_list_selector).val());
        console.log("current list index = "+rebuildListSelector(item_list_selector,lists[$('#'+subject_list_selector).val()].entries,nf))
    
-    if(currentFilename!=undefined && config.autosave) SaveList(arrayOfContent,currentFilename);
+    if(currentFilename!=undefined && config.autosave) SaveDocument(easyMDE.value(),currentFilename);
  
-
-    arrayOfContent=await ajaxGetJSON('items/'+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
     currentFilename=lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()];
-    render();
+  
+    easyMDE.value(await ajaxGet('items/'+currentFilename));    
+    //arrayOfContent=await ajaxGetJSON('items/'+lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]);
+    //render();
 
     $("#backBTN").prop("disabled",p==currentFilename);
     if(p==currentFilename) previousFilename=undefined;
@@ -156,28 +161,7 @@ function SelectNewSubject(newsubject,newfile) {
     }
     
     console.log("want to change subject to "+newsubject+" and load list "+newfile)
-    // for(var i=0; i<lists.length; i++) {
-    //     if(lists[i].subject==newsubject) {
-    //         $('#'+subject_list_selector).val(i)
-    //         console.log("found and selected new subject")
-    //     }
-    //     tj=lists[$('#'+subject_list_selector).val()].entries[$('#'+item_list_selector).val()]
-    // }
-
-    //subjectListIndex=$('#'+subject_list_selector).val();
-
-    // console.log("changeSubjectList(): fire rebuild list-selector")
-
-    // var t=lists[$('#'+subject_list_selector).val()].subject
-
-    // if(tj.startsWith(t)) {
-    //     console.log("tj DOES start with "+t)
-    // } else {
-    //     console.log("tj does NOT start with "+t)
-     
-    //     tj=t+"/index."+config.ext
-    // }
-    // console.log("\tcalling rebuildListSelector with tj="+tj)
+    
 
     rebuildListSelector(item_list_selector,lists[$('#'+subject_list_selector).val()].entries,newfile)
 
@@ -196,7 +180,8 @@ function revertList() {
     }
     $("#backBTN").prop("disabled",true);
 }
-async function startTodo() {
+async function startEditor() {
+    console.log("startEditor....")
     //load /config into memory
 	config=await ajaxGetJSON("config/");
 
@@ -215,40 +200,13 @@ async function startTodo() {
     previousFilename=undefined // on purpose, also disable back button
     $("#backBTN").prop("disabled",true);
     DEBUG && console.log("loading: "+currentFilename)
-    arrayOfContent=await ajaxGetJSON('items/'+currentFilename)
-
-	//render it
-	render();
-}
-
-function addIt() {
-    console.log("add new item");
-    var object={};
-
-    object.name=$("#itemName").val();
-    object.votes=0;
-    object.skip=false;
-    if($("#itemJSON").val()!="") object.json=$("#itemJSON").val();
-
-	if($("#itemPeriod").val()!="") {
-		object.periodic=true;
-		object.period=Number($("#itemPeriod").val());
-		var now=new Date();
-		var dtom=DaysToMS(object.period)
-		console.log("days="+object.period);
-		console.log("ms="+dtom);
-		console.log("ms(now)="+now.getTime());
-		var dueDate=new Date(now.getTime()+dtom);
-		object.nextDue=dueDate.getTime();
-		
-		console.log("next due is "+object.nextDue);
-		console.log("\tas date: "+EpocMStoISODate(object.nextDue));
-	}
-    arrayOfContent.push(object);
-
-    $("#itemName").val("");
-    $("#itemJSON").val("");
-    $("#itemPeriod").val("");
-    render();
-    saveit();
+    
+    var h="300px";
+    if(config.minHeight!=undefined) {
+        h=config.minHeight;
+    }
+    console.log(" h = "+h);
+    
+    easyMDE = new EasyMDE({element: $('#editor')[0], minHeight: h, spellChecker:false });
+    easyMDE.value(await ajaxGet('items/'+currentFilename));    
 }

@@ -12,3 +12,4 @@ TODO=true
 AUTOSAVE=false
 # prevent web server from serving individual items
 STRICT=true
+MINHEIGHT=700px

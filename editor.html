@@ -10,37 +10,38 @@
 	<link rel="stylesheet" href="css/modal.css" />
 	<link rel="stylesheet" href="css/fontawsme.css" />
 	<link rel='stylesheet' href='css/fontawall.css' />
+	<link rel='stylesheet' href='css/easymde.min.css' />
 	<link rel="shortcut icon" href="images/fvw.png" type="image/x-icon" />
 	<script src="js/jquery-1.12.4.js"></script>
 	<script src="js/jquery-ui.js"></script>
+	<script src="js/easymde.min.js"></script>
 	<!-- script src="js/constants.js"></script> -->
 	<script src="js/utils.js"></script>
-	<script src="js/todo.js"></script>
+	<script src="js/editor.js"></script>
 	<script>
+		var easyMDE;
 		$(document).ready(function(){
-			startTodo()
-			
+			startEditor()			
 			console.log("document ready");
 		});
 	</script>
 </head>
 
 <body>
-	<strong>Vote!</strong>
+	<strong>Markdown Editor</strong>
 	<div id="titleDiv" style="display:none">Title: not implemented</div>
 	<div id="loadedSubject">Subject: <select id="subject-list-selector" onchange="changeSubject()"></select></div>
-	<div id="loadedList">List: <select id="item-list-selector" onchange="changeItem()"></select></div>
+	<div id="loadedDocument">Document: <select id="item-list-selector" onchange="changeItem()"></select></div>
 	<div><button id="backBTN" onclick="revertList()">Go Back</button></div>
 	<!-- Total Vote Count: <input type=text id="voteCount" value="100" /><BR>-->
-	<table id="thetable" border=1>
-	</table>
-	<button onclick="vote()">Vote</button>
-	<button onclick="render()">Refresh Page</button>
+	
+	<!-- <button onclick="vote()">Vote</button>
+	<button onclick="render()">Refresh Page</button>-->
 	<button id="saveButton" onclick="saveit()">Save</button>
 	<BR />
 	<HR>
 	<BR />
-	<table border=1>
+	<!-- <table border=1>
 		<tr>
 			<td>Item: </td><td><input id="itemName" type="text" size="30" /></td>
 		</tr>
@@ -56,6 +57,11 @@
 			
 			
 		</tr>
-	</table>
+	</table> -->
+
+	<textarea id="editor" style="height:600px"></textarea>
+	
+
+
 </body>
 </html>
